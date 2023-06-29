@@ -4,7 +4,7 @@
 #define MOTOR_ENCODER_A 2
 #define MOTOR_ENCODER_B 3
 
-#define ENCODER_CONSTANT 55.5
+#define ENCODER_CONSTANT 2
 #define WHEEL_DIAMETER_CM 6.5
 #define WHEEL_DISTANCE_CM 14.5
 
@@ -16,13 +16,13 @@ int pinAStateOld = 0;
 int pinBState = 0;
 int pinBStateOld = 0;
 
-const int defaultEncoderPosValue = (86 - 50) * ENCODER_CONSTANT;
+const float defaultEncoderPosValue = (8600 - 5000) * ENCODER_CONSTANT;
 volatile long encoder0pos = defaultEncoderPosValue;
 
 boolean doCounterForce = true;
 boolean doingSpin = false;
 
-int outputValue = 0;
+float outputValue = 0;
 
 int force = map(defaultEncoderPosValue, 100, 0, 50, 215);
 
@@ -54,7 +54,7 @@ void setup() {
 
 void loop() {
   if (!doingSpin) setEncoderValue(); // Update encoder value
-  outputValue = constrain(map((int(encoder0pos / ENCODER_CONSTANT)), -50, 50, 0, 100), 0, 100);
+  outputValue = constrain(map((encoder0pos / ENCODER_CONSTANT), -5000, 5000, 0, 10000), 0, 10000)/100.0;
   force = map(outputValue, 100, 0, 50, 215);
 
   debouncer.update();
@@ -71,7 +71,7 @@ void loop() {
       forceApplied = true;
       //delay(100);
     } else {
-      setMotor(0, 0, 9, 10, 11); // Stop the motor
+      setMotor(0, 0, 9, 10, 11);
       forceApplied = false;
     }
     lastUpdateTime = millis();
@@ -87,7 +87,7 @@ void loop() {
 
   // Print encoder values
   // Serial.print("Encoder: ");
-  Serial.print(outputValue);
+  Serial.print(int(outputValue*100));
   Serial.print('\t');
   Serial.print(1 - debouncer.read());
   Serial.print('\n');
@@ -126,10 +126,10 @@ void setEncoderValue() {
   pinAStateOld = pinAState;
   pinBStateOld = pinBState;
 
-  if (encoder0pos - 300 >= (50 * ENCODER_CONSTANT)) {
-    encoder0pos = 50 * ENCODER_CONSTANT;  // Set to maximum value
-  } else if (encoder0pos + 300 <= (-50 * ENCODER_CONSTANT)) {
-    encoder0pos = -50 * ENCODER_CONSTANT; // Set to minimum value
+  if (encoder0pos - 300 >= (5000 * ENCODER_CONSTANT)) {
+    encoder0pos = 5000 * ENCODER_CONSTANT;  // Set to maximum value
+  } else if (encoder0pos + 300 <= (-5000 * ENCODER_CONSTANT)) {
+    encoder0pos = -5000 * ENCODER_CONSTANT; // Set to minimum value
   }
 }
 
